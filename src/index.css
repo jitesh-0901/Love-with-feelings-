@@ -1,0 +1,133 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-rose: #fff5f7;
+    --card-surface: #ffffff;
+    --rose-accent: #d9255a;
+    --text-dark: #12030d;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    box-sizing: border-box;
+  }
+
+  body {
+    background-color: #fff5f7;
+    color: #12030d;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    overflow-x: hidden;
+    position: relative;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  /* Real rose scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #ffe4ea;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #f43f6e;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #d9255a;
+  }
+}
+
+@layer utilities {
+  /* 3D transforms */
+  .preserve-3d {
+    transform-style: preserve-3d;
+  }
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+  .backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  /* Crisp, clean, non-cluttered white card with real rose borders */
+  .rose-card {
+    background-color: #ffffff;
+    border: 1.5px solid #fecdd3;
+    box-shadow: 0 10px 28px -4px rgba(225, 29, 72, 0.08), 0 2px 8px rgba(0, 0, 0, 0.03);
+    border-radius: 20px;
+  }
+
+  .rose-card-hover {
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .rose-card-hover:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 36px -4px rgba(225, 29, 72, 0.16);
+    border-color: #fb7185;
+  }
+
+  /* High-Contrast Rose Petal Button (Highly visible, vibrant, gorgeous) */
+  .rose-btn-primary {
+    background: linear-gradient(135deg, #e63968 0%, #d9255a 50%, #c2185b 100%);
+    color: #ffffff !important;
+    font-weight: 700;
+    box-shadow: 0 6px 20px rgba(217, 37, 90, 0.35);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .rose-btn-primary:hover {
+    background: linear-gradient(135deg, #f72585 0%, #e63968 50%, #d9255a 100%);
+    box-shadow: 0 8px 25px rgba(217, 37, 90, 0.5);
+    transform: translateY(-1.5px);
+  }
+  .rose-btn-primary:active {
+    transform: translateY(1px);
+  }
+
+  /* Real Emotional Handwritten Letter Stationery Paper */
+  .rose-letter-paper {
+    background-color: #fdfbf7;
+    background-image: 
+      repeating-linear-gradient(transparent, transparent 33px, rgba(225, 29, 72, 0.1) 33px, rgba(225, 29, 72, 0.1) 34px);
+    border: 1.5px solid #fecdd3;
+    box-shadow: 
+      0 20px 45px -10px rgba(225, 29, 72, 0.15),
+      0 4px 15px rgba(0, 0, 0, 0.05),
+      inset 0 0 40px rgba(254, 226, 226, 0.25);
+    position: relative;
+  }
+
+  /* Paper fold crease shadow */
+  .rose-letter-paper::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 5%, rgba(0, 0, 0, 0.04) 50%, transparent 95%);
+    pointer-events: none;
+  }
+
+  /* Polaroid Photo Card styling */
+  .rose-polaroid {
+    background: #ffffff;
+    padding: 10px 10px 22px 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
+    border: 1px solid #fecdd3;
+    border-radius: 8px;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .rose-polaroid:hover {
+    transform: translateY(-4px) scale(1.02) !important;
+    box-shadow: 0 16px 32px rgba(217, 37, 90, 0.2);
+    border-color: #fb7185;
+    z-index: 30;
+  }
+}
