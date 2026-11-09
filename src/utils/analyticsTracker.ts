@@ -11,7 +11,7 @@ const STORAGE_KEY_EVENTS = 'ovi_analytics_events';
 const SESSION_KEY = 'ovi_visit_session_id';
 
 export const DEFAULT_SCRIPT_URL =
-  'https://script.google.com/macros/s/AKfycbxSgK4WKa4RkxaNH1Li8xeG_3684KTBnCFqAG1l3U211GFFo6AUOPc4dAwijPZvRnTe/exec';
+  'https://script.google.com/macros/s/AKfycbxvI6kEQm8660GefngHl6OPv_5xEAW5UX5klPzV8YpErU4KSP21uh4udpx3QSu7dnhJ/exec';
 
 export interface AnalyticsRecord {
   id: string;
