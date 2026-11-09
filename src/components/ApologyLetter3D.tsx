@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Sparkles, ArrowRight, Feather, Download } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import gsap from 'gsap';
-import { jsPDF } from 'jspdf';
+import { generateLuxuryApologyPdf } from '../utils/pdfLetterGenerator';
 import { logAnalyticsEvent, updateSessionSummary } from '../utils/analyticsTracker';
 import { sound } from '../utils/soundEffects';
 
@@ -113,123 +113,15 @@ export const ApologyLetter3D: React.FC<ApologyLetter3DProps> = ({ onNext, isRedu
     setStampedHearts((prev) => [...prev.slice(-8), { id: Date.now(), x, y }]);
   };
 
-  const handleDownloadPdf = () => {
+  const handleDownloadPdf = async () => {
     updateSessionSummary({ downloadedPdf: true });
     logAnalyticsEvent('📥 Downloaded PDF Letter', 'Saved For_Ovi_ma_Apology_Letter.pdf');
     sound.playChime(1046.5, 0.4);
 
     try {
-      const doc = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
-
-      // Vintage ivory-rose background
-      doc.setFillColor(255, 245, 247);
-      doc.rect(0, 0, 210, 297, 'F');
-
-      // Double decorative rose gold border
-      doc.setDrawColor(217, 37, 90);
-      doc.setLineWidth(1.2);
-      doc.rect(12, 12, 186, 273);
-
-      doc.setDrawColor(244, 63, 94);
-      doc.setLineWidth(0.4);
-      doc.rect(14.5, 14.5, 181, 268);
-
-      // Vintage Air Mail stamp in top right
-      doc.setDrawColor(217, 37, 90);
-      doc.setLineWidth(0.3);
-      doc.rect(160, 20, 28, 22);
-      doc.setFont('times', 'bold');
-      doc.setFontSize(8);
-      doc.setTextColor(217, 37, 90);
-      doc.text('AIR MAIL', 174, 29, { align: 'center' });
-      doc.setFontSize(7);
-      doc.text('FOR OVI MA', 174, 35, { align: 'center' });
-
-      // Header Title
-      doc.setFont('times', 'bold');
-      doc.setFontSize(22);
-      doc.setTextColor(184, 21, 69);
-      doc.text('THE LETTER I NEVER SAID', 105, 34, { align: 'center' });
-
-      doc.setFont('times', 'italic');
-      doc.setFontSize(11);
-      doc.setTextColor(120, 20, 50);
-      doc.text('A Sincere Handwritten Apology For Ovi Ma', 105, 42, { align: 'center' });
-
-      // Center Divider line
-      doc.setDrawColor(225, 29, 72);
-      doc.setLineWidth(0.6);
-      doc.line(65, 47, 145, 47);
-
-      // Letter Body Content
-      const letterContent: { text: string; bold?: boolean; italic?: boolean; size?: number; color?: number[]; space?: number; align?: 'right' }[] = [
-        { text: 'Dear Ovi ma,', bold: true, size: 16, color: [184, 21, 69] },
-        { text: '', space: 6 },
-        { text: "Unna hurt pannirundha, from my heart, I'm really sorry.", bold: false, size: 13, color: [20, 10, 15] },
-        { text: '', space: 6 },
-        { text: 'Sila neram kovathula pesura vaarthaigal evlo hurt pannumnu yosikkaama poiduren.', bold: false, size: 13, color: [20, 10, 15] },
-        { text: 'Aana un feelings-ah naan light-ah eduthukala.', bold: false, size: 13, color: [20, 10, 15] },
-        { text: '', space: 6 },
-        { text: 'Unna convince panradhukku mattum indha page create pannala.', bold: false, size: 13, color: [20, 10, 15] },
-        { text: 'Naan enna thappa pannirundhen, adha purinjukittu better-ah maara virumburen.', bold: false, size: 13, color: [20, 10, 15] },
-        { text: '', space: 6 },
-        { text: 'Unna naan respect pannanum. Un feelings-ah kekkanum.', bold: false, size: 13, color: [20, 10, 15] },
-        { text: 'Unakku thevaiyana space kudukkanum.', bold: false, size: 13, color: [20, 10, 15] },
-        { text: '', space: 8 },
-        { text: "I'm sorry, Ovi ma. ❤️", bold: true, size: 15, color: [184, 21, 69] },
-        { text: '', space: 10 },
-        { text: '— Endrum unakkaga, naan.', italic: true, size: 13, color: [120, 20, 50], align: 'right' },
-      ];
-
-      let yPos = 65;
-      letterContent.forEach((item) => {
-        if (item.space) {
-          yPos += item.space;
-          return;
-        }
-
-        if (item.bold) {
-          doc.setFont('times', 'bolditalic');
-        } else if (item.italic) {
-          doc.setFont('times', 'italic');
-        } else {
-          doc.setFont('times', 'normal');
-        }
-
-        doc.setFontSize(item.size || 13);
-        const [r, g, b] = item.color || [30, 10, 20];
-        doc.setTextColor(r, g, b);
-
-        if (item.align === 'right') {
-          doc.text(item.text, 175, yPos, { align: 'right' });
-        } else {
-          doc.text(item.text, 25, yPos);
-        }
-
-        yPos += 8;
-      });
-
-      // Red Wax Seal Stamp at bottom
-      doc.setFillColor(217, 37, 90);
-      doc.circle(105, 240, 10, 'F');
-      doc.setFont('times', 'bold');
-      doc.setFontSize(10);
-      doc.setTextColor(255, 255, 255);
-      doc.text('LOVE', 105, 243, { align: 'center' });
-
-      // Footer
-      doc.setFont('times', 'italic');
-      doc.setFontSize(9);
-      doc.setTextColor(150, 60, 80);
-      doc.text('Written with heartfelt remorse & endless respect.', 105, 275, { align: 'center' });
-
-      doc.save('For_Ovi_ma_Apology_Letter.pdf');
+      await generateLuxuryApologyPdf();
     } catch (err) {
-      console.error('PDF export failed:', err);
+      console.error('Luxury PDF export failed:', err);
     }
   };
 
@@ -242,12 +134,10 @@ export const ApologyLetter3D: React.FC<ApologyLetter3DProps> = ({ onNext, isRedu
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-4"
       >
-        <h2 className="text-2xl sm:text-3xl font-serif font-black text-roseDark-950">
-          The Letter I Never Said
+        <h2 className="text-2xl sm:text-3xl font-serif font-black text-roseDark-950 flex items-center justify-center gap-2">
+          <span>It&apos;s from my heart</span>
+          <span>❤️</span>
         </h2>
-        <p className="text-xs text-roseDark-700 font-semibold mt-1">
-          Words from the deepest corner of my heart to Ovi ma
-        </p>
       </motion.div>
 
       {/* 3D Interactive Envelope Experience */}

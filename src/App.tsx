@@ -25,10 +25,6 @@ export const App: React.FC = () => {
   const secretClickCount = useRef<number>(0);
   const secretClickTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Touch swipe handling for mobile
-  const touchStartX = useRef<number | null>(null);
-  const touchStartY = useRef<number | null>(null);
-
   // Initial visit tracking & secret key combo
   useEffect(() => {
     if (!sessionStorage.getItem('ovi_visit_logged')) {
@@ -53,18 +49,6 @@ export const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleNext = () => {
-    if (currentChapter < STORY_CHAPTERS.length) {
-      goToChapter(currentChapter + 1);
-    }
-  };
-
-  const handlePrev = () => {
-    if (currentChapter > 1) {
-      goToChapter(currentChapter - 1);
-    }
-  };
-
   const handleStartFromOpening = () => {
     // Start synchronized 2-song soundtrack & advance to Chapter 2 (The Secret Letter)
     storyAudio.play();
@@ -75,39 +59,6 @@ export const App: React.FC = () => {
     storyAudio.reset();
     goToChapter(1);
   };
-
-  // Mobile swipe gestures
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null || touchStartY.current === null) return;
-    const deltaX = e.changedTouches[0].clientX - touchStartX.current;
-    const deltaY = e.changedTouches[0].clientY - touchStartY.current;
-
-    // Detect horizontal swipes only
-    if (Math.abs(deltaX) > 60 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
-      if (deltaX < 0) {
-        handleNext(); // swipe left -> next
-      } else {
-        handlePrev(); // swipe right -> prev
-      }
-    }
-    touchStartX.current = null;
-    touchStartY.current = null;
-  };
-
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') handleNext();
-      if (e.key === 'ArrowLeft') handlePrev();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentChapter]);
 
   // Framer Motion slide variants
   const pageVariants = {
@@ -151,8 +102,6 @@ export const App: React.FC = () => {
 
   return (
     <div
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
       className="relative min-h-screen min-h-[100dvh] bg-rosePetal-50 text-roseDark-800 flex flex-col justify-between overflow-x-hidden selection:bg-velvetRose-600 selection:text-white"
     >
       {/* 1. Dynamic Dreamy 3D Starfield */}
@@ -228,8 +177,8 @@ export const App: React.FC = () => {
           onClick={handleSecretFooterClick}
           className="text-[10px] sm:text-[11px] text-roseDark-700 font-cinzel font-bold tracking-wider cursor-default select-none"
         >
-          <span className="hidden sm:inline">SWIPE OR USE ARROWS TO NAVIGATE ♡</span>
-          <span className="sm:hidden">SWIPE TO NAVIGATE ♡</span>
+          <span className="hidden sm:inline">FOR OVI MA · ALWAYS &amp; FOREVER ♡</span>
+          <span className="sm:hidden">FOR OVI MA ♡</span>
         </p>
         <button
           onClick={() => {
