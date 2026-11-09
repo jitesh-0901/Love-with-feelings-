@@ -4,6 +4,7 @@ import { Heart, Sparkles, ArrowRight, Feather, Download } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import gsap from 'gsap';
 import { generateLuxuryApologyPdf } from '../utils/pdfLetterGenerator';
+import { LETTER_SALUTATION, LETTER_PARAGRAPHS, LETTER_SIGN_OFF } from '../utils/letterContent';
 import { logAnalyticsEvent, updateSessionSummary } from '../utils/analyticsTracker';
 import { sound } from '../utils/soundEffects';
 
@@ -12,50 +13,46 @@ interface ApologyLetter3DProps {
   isReducedMotion: boolean;
 }
 
-const LETTER_LINES = [
-  "Dear Ovi ma,",
-  "",
-  "Unna hurt pannirundha, from my heart, I'm really sorry.",
-  "",
-  "Sila neram kovathula pesura vaarthaigal evlo hurt pannumnu yosikkaama poiduren. Aana un feelings-ah naan light-ah eduthukala.",
-  "",
-  "Unna convince panradhukku mattum indha page create pannala. Naan enna thappa pannirundhen, adha purinjukittu better-ah maara virumburen.",
-  "",
-  "Unna naan respect pannanum. Un feelings-ah kekkanum. Unakku thevaiyana space kudukkanum.",
-  "",
-  "I'm sorry, Ovi ma. ❤️"
-];
-
 export const ApologyLetter3D: React.FC<ApologyLetter3DProps> = ({ onNext, isReducedMotion }) => {
   const [envelopeState, setEnvelopeState] = useState<'sealed' | 'unsealing' | 'sliding' | 'unfolded'>('sealed');
-  const [visibleLineCount, setVisibleLineCount] = useState<number>(0);
+  const [visibleParagraphCount, setVisibleParagraphCount] = useState<number>(0);
   const [isDoneWriting, setIsDoneWriting] = useState<boolean>(false);
   const [stampedHearts, setStampedHearts] = useState<{ id: number; x: number; y: number }[]>([]);
 
   const letterRef = useRef<HTMLDivElement>(null);
+  const letterScrollRef = useRef<HTMLDivElement>(null);
   const quillRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (envelopeState !== 'unfolded') return;
 
     if (isReducedMotion) {
-      setVisibleLineCount(LETTER_LINES.length);
+      setVisibleParagraphCount(LETTER_PARAGRAPHS.length);
       setIsDoneWriting(true);
       return;
     }
 
-    let line = 0;
+    let count = 0;
     const interval = setInterval(() => {
-      line++;
-      setVisibleLineCount(line);
-      sound.playChime(600 + line * 30, 0.2);
-      if (line >= LETTER_LINES.length) {
+      count++;
+      setVisibleParagraphCount(count);
+      sound.playChime(600 + count * 25, 0.2);
+
+      // Auto-scroll as new paragraphs write
+      if (letterScrollRef.current) {
+        letterScrollRef.current.scrollTo({
+          top: letterScrollRef.current.scrollHeight,
+          behavior: 'smooth',
+        });
+      }
+
+      if (count >= LETTER_PARAGRAPHS.length) {
         setIsDoneWriting(true);
         updateSessionSummary({ letterRead: 'Yes, 100% Read ♡' });
-        logAnalyticsEvent('📖 Letter Readed Perfectly', 'All lines read to the end');
+        logAnalyticsEvent('📖 Letter Readed Perfectly', 'All paragraphs read to the end');
         clearInterval(interval);
       }
-    }, 650);
+    }, 450);
 
     return () => clearInterval(interval);
   }, [envelopeState, isReducedMotion]);
@@ -97,10 +94,10 @@ export const ApologyLetter3D: React.FC<ApologyLetter3DProps> = ({ onNext, isRedu
   };
 
   const handleShowAll = () => {
-    setVisibleLineCount(LETTER_LINES.length);
+    setVisibleParagraphCount(LETTER_PARAGRAPHS.length);
     setIsDoneWriting(true);
     updateSessionSummary({ letterRead: 'Yes, 100% Read ♡' });
-    logAnalyticsEvent('📖 Letter Readed Perfectly', 'All lines read to the end');
+    logAnalyticsEvent('📖 Letter Readed Perfectly', 'All paragraphs read to the end');
     sound.playChime(880, 0.3);
   };
 
@@ -281,73 +278,66 @@ export const ApologyLetter3D: React.FC<ApologyLetter3DProps> = ({ onNext, isRedu
                 </div>
               </div>
 
-              {/* Authentic Handwritten Letter Content in Cursive Calligraphy */}
-              <div className="space-y-3 pl-6 sm:pl-10 relative z-10">
-                {LETTER_LINES.slice(0, visibleLineCount).map((line, idx) => {
-                  if (line === '') {
-                    return <div key={idx} className="h-2" />;
-                  }
+              {/* Authentic Handwritten Letter Content */}
+              <div
+                ref={letterScrollRef}
+                className="max-h-[58vh] sm:max-h-[64vh] overflow-y-auto pr-2 sm:pr-3 space-y-4 pl-6 sm:pl-10 relative z-10 custom-scrollbar select-text text-left"
+              >
+                {/* Salutation */}
+                <h3 className="font-handwritten text-3xl sm:text-4xl text-velvetRose-700 font-bold tracking-wide my-1 drop-shadow-xs">
+                  {LETTER_SALUTATION}
+                </h3>
 
-                  if (idx === 0) {
-                    return (
-                      <motion.h3
-                        key={idx}
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4 }}
-                        className="font-handwritten text-3xl sm:text-4xl text-velvetRose-700 font-bold tracking-wide my-1 drop-shadow-xs"
-                      >
-                        {line}
-                      </motion.h3>
-                    );
-                  }
-
-                  const isEnding = idx === LETTER_LINES.length - 1;
-
+                {/* Paragraphs */}
+                {LETTER_PARAGRAPHS.slice(0, visibleParagraphCount).map((para, idx) => {
+                  const isSpecial = idx === 8; // Highlight: enna thavikka vittu poiradha dii
                   return (
                     <motion.p
                       key={idx}
-                      initial={{ opacity: 0, y: 6 }}
+                      initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4 }}
-                      className={`font-handwritten leading-[32px] sm:leading-[34px] tracking-wide ${
-                        isEnding
-                          ? 'text-2xl sm:text-3xl text-velvetRose-700 font-bold pt-2'
-                          : 'text-xl sm:text-2xl text-roseDark-950 font-bold'
+                      transition={{ duration: 0.35 }}
+                      className={`font-serif tracking-wide leading-relaxed ${
+                        isSpecial
+                          ? 'text-base sm:text-lg text-velvetRose-700 font-bold bg-rosePetal-100/50 p-2.5 rounded-xl border-l-2 border-velvetRose-500'
+                          : 'text-sm sm:text-[15.5px] text-roseDark-950 font-medium'
                       }`}
                     >
-                      {line}
+                      {para}
                     </motion.p>
                   );
                 })}
 
                 {!isDoneWriting && (
-                  <span className="inline-block w-2.5 h-5 bg-velvetRose-600 animate-pulse rounded-xs" />
+                  <div className="flex items-center gap-1.5 text-velvetRose-600 text-xs font-cinzel font-bold pt-2">
+                    <span className="inline-block w-2.5 h-4 bg-velvetRose-600 animate-pulse rounded-xs" />
+                    <span>Writing from my heart...</span>
+                  </div>
+                )}
+
+                {/* Hand-Signed Close & Red Wax Impression */}
+                {visibleParagraphCount >= LETTER_PARAGRAPHS.length && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="mt-6 pt-4 flex items-center justify-between border-t border-rosePetal-200/60"
+                  >
+                    <p className="font-handwritten text-2xl sm:text-3xl text-velvetRose-800 font-bold italic">
+                      {LETTER_SIGN_OFF}
+                    </p>
+
+                    {/* Wax Seal Stamp Impression */}
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-velvetRose-700 to-rosePetal-500 border border-white shadow-md flex items-center justify-center -rotate-6">
+                      <Heart size={16} className="text-white fill-white" />
+                    </div>
+                  </motion.div>
                 )}
               </div>
 
-              {/* Hand-Signed Close & Red Wax Impression */}
-              {visibleLineCount >= LETTER_LINES.length && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
-                  className="mt-5 pt-3 pl-6 sm:pl-10 flex items-center justify-between border-t border-rosePetal-200/50"
-                >
-                  <p className="font-handwritten text-xl sm:text-2xl text-roseDark-800 font-bold italic">
-                    — Endrum unakkaga, naan.
-                  </p>
-
-                  {/* Wax Seal Stamp Impression */}
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-velvetRose-700 to-rosePetal-500 border border-white shadow-md flex items-center justify-center -rotate-6">
-                    <Heart size={16} className="text-white fill-white" />
-                  </div>
-                </motion.div>
-              )}
-
               {/* Skip button */}
               {!isDoneWriting && (
-                <div className="mt-4 pt-2 flex justify-end">
+                <div className="mt-3 pt-2 flex justify-end">
                   <button
                     onClick={handleShowAll}
                     className="text-xs text-velvetRose-600 hover:text-velvetRose-700 underline decoration-dotted font-bold"

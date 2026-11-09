@@ -1,4 +1,26 @@
 import { jsPDF } from 'jspdf';
+import { LETTER_SALUTATION, LETTER_PARAGRAPHS, LETTER_SIGN_OFF } from './letterContent';
+
+const wrapCanvasText = (ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string[] => {
+  const words = text.split(' ');
+  const lines: string[] = [];
+  let currentLine = '';
+
+  for (const word of words) {
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
+    const metrics = ctx.measureText(testLine);
+    if (metrics.width > maxWidth && currentLine) {
+      lines.push(currentLine);
+      currentLine = word;
+    } else {
+      currentLine = testLine;
+    }
+  }
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+  return lines;
+};
 
 // Ultra-Luxury Handwritten Royal Parchment PDF Letter Generator
 // Crafts an exquisite, keepsake A4 apology letter for Ovi ma with:
@@ -233,16 +255,18 @@ export const generateLuxuryApologyPdf = async (): Promise<void> => {
   ctx.restore();
 
   // 5. NOTEBOOK RED MARGIN LINE & DELICATE FEINT RULES
-  const lineStartY = headerY + 120;
-  const lineEndY = height - marginInner - 220;
+  const lineStartY = headerY + 80;
+  const lineEndY = height - marginInner - 200;
   const textLeft = 240;
-  const textRight = width - marginInner - 80;
-  const lineHeight = 58;
+  const textRight = width - marginInner - 70;
+  const maxTextWidth = textRight - textLeft;
+  const textLineHeight = 31;
+  const paragraphSpacing = 13;
 
   // Feint soft ruled lines
-  ctx.strokeStyle = 'rgba(244, 63, 94, 0.12)';
+  ctx.strokeStyle = 'rgba(244, 63, 94, 0.09)';
   ctx.lineWidth = 1;
-  for (let ly = lineStartY + 10; ly <= lineEndY + 60; ly += lineHeight) {
+  for (let ly = lineStartY + 10; ly <= lineEndY + 40; ly += textLineHeight) {
     ctx.beginPath();
     ctx.moveTo(170, ly);
     ctx.lineTo(textRight, ly);
@@ -250,88 +274,49 @@ export const generateLuxuryApologyPdf = async (): Promise<void> => {
   }
 
   // Left Notebook Red Margin Line
-  ctx.strokeStyle = 'rgba(225, 29, 72, 0.35)';
+  ctx.strokeStyle = 'rgba(225, 29, 72, 0.32)';
   ctx.lineWidth = 1.8;
   ctx.beginPath();
-  ctx.moveTo(210, lineStartY - 30);
-  ctx.lineTo(210, lineEndY + 80);
+  ctx.moveTo(210, lineStartY - 20);
+  ctx.lineTo(210, lineEndY + 60);
   ctx.stroke();
 
   // 6. LETTER BODY CONTENT (Rich Handwritten-Style Typography)
   ctx.textAlign = 'left';
-  let curY = lineStartY + 30;
+  let curY = lineStartY + 25;
 
   // Salutation
   ctx.fillStyle = '#880e4f';
-  ctx.font = 'bold italic 34px "Georgia", "Times New Roman", serif';
-  ctx.fillText('Dear Ovi ma,', textLeft, curY);
-  curY += lineHeight * 1.35;
+  ctx.font = 'bold italic 30px "Georgia", "Times New Roman", serif';
+  ctx.fillText(LETTER_SALUTATION, textLeft, curY);
+  curY += textLineHeight * 1.35;
 
-  // Letter Paragraphs Structure
-  const paragraphs: {
-    lines: string[];
-    isBold?: boolean;
-    isHighlight?: boolean;
-    spaceAfter?: number;
-  }[] = [
-    {
-      lines: ["Unna hurt pannirundha, from my heart, I'm really sorry."],
-      spaceAfter: 1.15,
-    },
-    {
-      lines: [
-        'Sila neram kovathula pesura vaarthaigal evlo hurt pannumnu',
-        'yosikkaama poiduren. Aana un feelings-ah naan light-ah eduthukala.',
-      ],
-      spaceAfter: 1.15,
-    },
-    {
-      lines: [
-        'Unna convince panradhukku mattum indha page create pannala.',
-        'Naan enna thappa pannirundhen, adha purinjukittu better-ah maara virumburen.',
-      ],
-      spaceAfter: 1.15,
-    },
-    {
-      lines: [
-        'Unna naan respect pannanum. Un feelings-ah kekkanum.',
-        'Unakku thevaiyana space kudukkanum.',
-      ],
-      spaceAfter: 1.3,
-    },
-    {
-      lines: ["I'm sorry, Ovi ma. ❤️"],
-      isBold: true,
-      isHighlight: true,
-      spaceAfter: 1.4,
-    },
-  ];
-
-  paragraphs.forEach((p) => {
-    if (p.isHighlight) {
+  LETTER_PARAGRAPHS.forEach((para, pIdx) => {
+    // Highlight paragraph 8 ("unna thavikka vittu poyiraadha dii plss dii Ovi maa...")
+    const isSpecial = pIdx === 8;
+    if (isSpecial) {
       ctx.fillStyle = '#9f1239';
-      ctx.font = 'bold italic 32px "Georgia", "Times New Roman", serif';
+      ctx.font = 'bold italic 21px "Georgia", "Times New Roman", serif';
     } else {
       ctx.fillStyle = '#260d19'; // Warm rich espresso-plum ink
-      ctx.font = '27px "Georgia", "Times New Roman", serif';
+      ctx.font = '19.5px "Georgia", "Times New Roman", serif';
     }
 
-    p.lines.forEach((line) => {
+    const wrapped = wrapCanvasText(ctx, para, maxTextWidth);
+    wrapped.forEach((line) => {
       ctx.fillText(line, textLeft, curY);
-      curY += lineHeight;
+      curY += textLineHeight;
     });
 
-    if (p.spaceAfter) {
-      curY += lineHeight * (p.spaceAfter - 1);
-    }
+    curY += paragraphSpacing;
   });
 
   // Sign-off (Right-aligned)
   ctx.textAlign = 'right';
   ctx.fillStyle = '#880e4f';
-  ctx.font = 'italic 28px "Georgia", "Times New Roman", serif';
-  ctx.fillText('— Endrum unakkaga, naan.', textRight - 40, curY);
-  curY += 60;
+  ctx.font = 'italic 25px "Georgia", "Times New Roman", serif';
+  ctx.fillText(LETTER_SIGN_OFF, textRight - 30, curY + 15);
+  curY += 45;
 
   // 7. HANDCRAFTED 3D RUBY WAX SEAL WITH SATIN RIBBONS (Bottom Center)
   const sealX = width / 2;
